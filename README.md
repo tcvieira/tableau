@@ -1,6 +1,8 @@
 Instructions
 =====
 
+**Documentation** [https://epistemictableau.herokuapp.com](https://epistemictableau.herokuapp.com)
+
 Connectives
 -----------
 
