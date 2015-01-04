@@ -1,0 +1,622 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Documentation for the Code &mdash; TableauVerifier 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="TableauVerifier 1.0 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">TableauVerifier 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-srcLRparsing">
+<span id="documentation-for-the-code"></span><h1>Documentation for the Code<a class="headerlink" href="#module-srcLRparsing" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="formula-utils-py">
+<h2>formula_utils.py<a class="headerlink" href="#formula-utils-py" title="Permalink to this headline">¶</a></h2>
+<p>Auxiliary formula functions implementation</p>
+<span class="target" id="module-srcLRparsing.formula_utils"></span><dl class="function">
+<dt id="srcLRparsing.formula_utils.apply_de_morgan">
+<tt class="descclassname">srcLRparsing.formula_utils.</tt><tt class="descname">apply_de_morgan</tt><big>(</big><em>parsetree_list</em>, <em>connective</em><big>)</big><a class="reference internal" href="_modules/srcLRparsing/formula_utils.html#apply_de_morgan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#srcLRparsing.formula_utils.apply_de_morgan" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>parsetree_list</strong> &#8211; List BINARY formula parsetree list</li>
+<li><strong>connective</strong> &#8211; String main operator of bynary formula</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">String string representation of the new binary formula with de morgan rule applied</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="srcLRparsing.formula_utils.apply_modal_de_morgan">
+<tt class="descclassname">srcLRparsing.formula_utils.</tt><tt class="descname">apply_modal_de_morgan</tt><big>(</big><em>parsetree_list</em>, <em>connective</em><big>)</big><a class="reference internal" href="_modules/srcLRparsing/formula_utils.html#apply_modal_de_morgan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#srcLRparsing.formula_utils.apply_modal_de_morgan" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>parsetree_list</strong> &#8211; List BINARY formula parsetree list</li>
+<li><strong>connective</strong> &#8211; String main operator of bynary formula</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">String string representation of the new binary formula with de morgan rule applied</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="srcLRparsing.formula_utils.get_NNF_recursive">
+<tt class="descclassname">srcLRparsing.formula_utils.</tt><tt class="descname">get_NNF_recursive</tt><big>(</big><em>parsetree_list</em><big>)</big><a class="reference internal" href="_modules/srcLRparsing/formula_utils.html#get_NNF_recursive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#srcLRparsing.formula_utils.get_NNF_recursive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get negation normal form from a parsetree list WITH NO IMPLICATIONS
+:param parsetree_list: List tree representation of the string formula with no implications
+:return: List parsetree list in negation normal form</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="srcLRparsing.formula_utils.get_len">
+<tt class="descclassname">srcLRparsing.formula_utils.</tt><tt class="descname">get_len</tt><big>(</big><em>parsetree_list</em><big>)</big><a class="reference internal" href="_modules/srcLRparsing/formula_utils.html#get_len"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#srcLRparsing.formula_utils.get_len" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the size of a formula without counting brackets, only symbols
+:param parsetree_list: List parsetree list
+:return: Int size of the formula</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="srcLRparsing.formula_utils.get_main_operator">
+<tt class="descclassname">srcLRparsing.formula_utils.</tt><tt class="descname">get_main_operator</tt><big>(</big><em>parsetree_list</em><big>)</big><a class="reference internal" href="_modules/srcLRparsing/formula_utils.html#get_main_operator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#srcLRparsing.formula_utils.get_main_operator" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parsetree_list</strong> &#8211; List tree representation of the string formula</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">String main operator operator as string</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="srcLRparsing.formula_utils.get_negation">
+<tt class="descclassname">srcLRparsing.formula_utils.</tt><tt class="descname">get_negation</tt><big>(</big><em>parsetree_list</em><big>)</big><a class="reference internal" href="_modules/srcLRparsing/formula_utils.html#get_negation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#srcLRparsing.formula_utils.get_negation" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parsetree_list</strong> &#8211; List tree representation of the string formula</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">List tree representation of the negated string formula</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="srcLRparsing.formula_utils.get_subformulae_recursive">
+<tt class="descclassname">srcLRparsing.formula_utils.</tt><tt class="descname">get_subformulae_recursive</tt><big>(</big><em>parsetree_list</em>, <em>subformulae_list</em><big>)</big><a class="reference internal" href="_modules/srcLRparsing/formula_utils.html#get_subformulae_recursive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#srcLRparsing.formula_utils.get_subformulae_recursive" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>parsetree_list</strong> &#8211; List tree representation of the string formula</li>
+<li><strong>subformulae_list</strong> &#8211; List of subformulae as parsetree list</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">List of subformulae as parsetree list</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="srcLRparsing.formula_utils.is_always">
+<tt class="descclassname">srcLRparsing.formula_utils.</tt><tt class="descname">is_always</tt><big>(</big><em>parsetree_list</em><big>)</big><a class="reference internal" href="_modules/srcLRparsing/formula_utils.html#is_always"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#srcLRparsing.formula_utils.is_always" title="Permalink to this definition">¶</a></dt>
+<dd><p>:param parsetree_list:List tree representation of the string formula
+:return: True if is always formulae, False otherwise</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="srcLRparsing.formula_utils.is_atom">
+<tt class="descclassname">srcLRparsing.formula_utils.</tt><tt class="descname">is_atom</tt><big>(</big><em>parsetree_list</em><big>)</big><a class="reference internal" href="_modules/srcLRparsing/formula_utils.html#is_atom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#srcLRparsing.formula_utils.is_atom" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parsetree_list</strong> &#8211; List tree representation of the string formula</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if is atom, False otherwise</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="srcLRparsing.formula_utils.is_binary">
+<tt class="descclassname">srcLRparsing.formula_utils.</tt><tt class="descname">is_binary</tt><big>(</big><em>parsetree_list</em><big>)</big><a class="reference internal" href="_modules/srcLRparsing/formula_utils.html#is_binary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#srcLRparsing.formula_utils.is_binary" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parsetree_list</strong> &#8211; List tree representation of the string formula</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if is binary, False otherwise</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="srcLRparsing.formula_utils.is_conjuction">
+<tt class="descclassname">srcLRparsing.formula_utils.</tt><tt class="descname">is_conjuction</tt><big>(</big><em>parsetree_list</em><big>)</big><a class="reference internal" href="_modules/srcLRparsing/formula_utils.html#is_conjuction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#srcLRparsing.formula_utils.is_conjuction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Should be called after or in conjunction with is_binary
+:param parsetree_list:List tree representation of the string formula
+:return: True if is a conjunction, False otherwise</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="srcLRparsing.formula_utils.is_disjunction">
+<tt class="descclassname">srcLRparsing.formula_utils.</tt><tt class="descname">is_disjunction</tt><big>(</big><em>parsetree_list</em><big>)</big><a class="reference internal" href="_modules/srcLRparsing/formula_utils.html#is_disjunction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#srcLRparsing.formula_utils.is_disjunction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Should be called after or in conjunction with is_binary
+:param parsetree_list:List tree representation of the string formula
+:return: True if is a disjunction, False otherwise</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="srcLRparsing.formula_utils.is_eventually">
+<tt class="descclassname">srcLRparsing.formula_utils.</tt><tt class="descname">is_eventually</tt><big>(</big><em>parsetree_list</em><big>)</big><a class="reference internal" href="_modules/srcLRparsing/formula_utils.html#is_eventually"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#srcLRparsing.formula_utils.is_eventually" title="Permalink to this definition">¶</a></dt>
+<dd><p>:param parsetree_list:List tree representation of the string formula
+:return: True if is eventually formulae, False otherwise</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="srcLRparsing.formula_utils.is_false">
+<tt class="descclassname">srcLRparsing.formula_utils.</tt><tt class="descname">is_false</tt><big>(</big><em>parsetree_list</em><big>)</big><a class="reference internal" href="_modules/srcLRparsing/formula_utils.html#is_false"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#srcLRparsing.formula_utils.is_false" title="Permalink to this definition">¶</a></dt>
+<dd><p>Should be called after or in conjunction with is_unary
+:param parsetree_list:List tree representation of the string formula
+:return: True if is false constant, False otherwise</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="srcLRparsing.formula_utils.is_knowledge">
+<tt class="descclassname">srcLRparsing.formula_utils.</tt><tt class="descname">is_knowledge</tt><big>(</big><em>parsetree_list</em><big>)</big><a class="reference internal" href="_modules/srcLRparsing/formula_utils.html#is_knowledge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#srcLRparsing.formula_utils.is_knowledge" title="Permalink to this definition">¶</a></dt>
+<dd><p>:param parsetree_list:List tree representation of the string formula
+:return: True if is knowledge formulae, False otherwise</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="srcLRparsing.formula_utils.is_negated_unary_or_atom">
+<tt class="descclassname">srcLRparsing.formula_utils.</tt><tt class="descname">is_negated_unary_or_atom</tt><big>(</big><em>parsetree_list</em>, <em>something</em><big>)</big><a class="reference internal" href="_modules/srcLRparsing/formula_utils.html#is_negated_unary_or_atom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#srcLRparsing.formula_utils.is_negated_unary_or_atom" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>parsetree_list</strong> &#8211; List tree representation of the string formula</li>
+<li><strong>something</strong> &#8211; String type of unary formula</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Boolean True if is negated knowledge, False otherwise</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="srcLRparsing.formula_utils.is_negation">
+<tt class="descclassname">srcLRparsing.formula_utils.</tt><tt class="descname">is_negation</tt><big>(</big><em>parsetree_list</em><big>)</big><a class="reference internal" href="_modules/srcLRparsing/formula_utils.html#is_negation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#srcLRparsing.formula_utils.is_negation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Should be called after or in conjunction with is_unary
+:param parsetree_list:List tree representation of the string formula
+:return: True if is negation, False otherwise</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="srcLRparsing.formula_utils.is_next">
+<tt class="descclassname">srcLRparsing.formula_utils.</tt><tt class="descname">is_next</tt><big>(</big><em>parsetree_list</em><big>)</big><a class="reference internal" href="_modules/srcLRparsing/formula_utils.html#is_next"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#srcLRparsing.formula_utils.is_next" title="Permalink to this definition">¶</a></dt>
+<dd><p>:param parsetree_list:List tree representation of the string formula
+:return: True if is next formulae, False otherwise</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="srcLRparsing.formula_utils.is_prop">
+<tt class="descclassname">srcLRparsing.formula_utils.</tt><tt class="descname">is_prop</tt><big>(</big><em>parsetree_list</em><big>)</big><a class="reference internal" href="_modules/srcLRparsing/formula_utils.html#is_prop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#srcLRparsing.formula_utils.is_prop" title="Permalink to this definition">¶</a></dt>
+<dd><p>:param parsetree_list:List tree representation of the string formula
+:return: True if is propositional symbol, False otherwise</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="srcLRparsing.formula_utils.is_true">
+<tt class="descclassname">srcLRparsing.formula_utils.</tt><tt class="descname">is_true</tt><big>(</big><em>parsetree_list</em><big>)</big><a class="reference internal" href="_modules/srcLRparsing/formula_utils.html#is_true"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#srcLRparsing.formula_utils.is_true" title="Permalink to this definition">¶</a></dt>
+<dd><p>Should be called after or in conjunction with is_unary
+:param parsetree_list:List tree representation of the string formula
+:return: True if is true constant, False otherwise</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="srcLRparsing.formula_utils.is_unary">
+<tt class="descclassname">srcLRparsing.formula_utils.</tt><tt class="descname">is_unary</tt><big>(</big><em>parsetree_list</em><big>)</big><a class="reference internal" href="_modules/srcLRparsing/formula_utils.html#is_unary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#srcLRparsing.formula_utils.is_unary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if is unary at the start or in subformulas
+:param parsetree_list: List tree representation of the string formula
+:return: True if is unary, False otherwise</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="srcLRparsing.formula_utils.is_unless">
+<tt class="descclassname">srcLRparsing.formula_utils.</tt><tt class="descname">is_unless</tt><big>(</big><em>parsetree_list</em><big>)</big><a class="reference internal" href="_modules/srcLRparsing/formula_utils.html#is_unless"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#srcLRparsing.formula_utils.is_unless" title="Permalink to this definition">¶</a></dt>
+<dd><p>Should be called after or in conjunction with is_binary
+:param parsetree_list:List tree representation of the string formula
+:return: True if is a unless, False otherwise</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="srcLRparsing.formula_utils.is_until">
+<tt class="descclassname">srcLRparsing.formula_utils.</tt><tt class="descname">is_until</tt><big>(</big><em>parsetree_list</em><big>)</big><a class="reference internal" href="_modules/srcLRparsing/formula_utils.html#is_until"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#srcLRparsing.formula_utils.is_until" title="Permalink to this definition">¶</a></dt>
+<dd><p>Should be called after or in conjunction with is_binary
+:param parsetree_list:List tree representation of the string formula
+:return: True if is a until, False otherwise</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="srcLRparsing.formula_utils.parsetree_list_to_string_with_parentheses">
+<tt class="descclassname">srcLRparsing.formula_utils.</tt><tt class="descname">parsetree_list_to_string_with_parentheses</tt><big>(</big><em>parsetree_list</em><big>)</big><a class="reference internal" href="_modules/srcLRparsing/formula_utils.html#parsetree_list_to_string_with_parentheses"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#srcLRparsing.formula_utils.parsetree_list_to_string_with_parentheses" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parsetree_list</strong> &#8211; List tree representation of the string formula</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">String formula representation as string with parentheses</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="srcLRparsing.formula_utils.parsetree_string_to_list">
+<tt class="descclassname">srcLRparsing.formula_utils.</tt><tt class="descname">parsetree_string_to_list</tt><big>(</big><em>parsetree_string</em><big>)</big><a class="reference internal" href="_modules/srcLRparsing/formula_utils.html#parsetree_string_to_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#srcLRparsing.formula_utils.parsetree_string_to_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Modify tuple string returned by grammar parse to a list without unnecessary tokens
+and brackets
+:param parsetree_string: String tree tuple string from grammar parser
+:return: List Python list representation of parsetree_string</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="srcLRparsing.formula_utils.propagate_negation_binary">
+<tt class="descclassname">srcLRparsing.formula_utils.</tt><tt class="descname">propagate_negation_binary</tt><big>(</big><em>unary_parsetree_list</em><big>)</big><a class="reference internal" href="_modules/srcLRparsing/formula_utils.html#propagate_negation_binary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#srcLRparsing.formula_utils.propagate_negation_binary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Propagate negation in one step on binary formulae
+:param unary_parsetree_list: List tree representation of the string formula
+:return: List parsetree list with negation propagated one step</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="srcLRparsing.formula_utils.propagate_negation_unary">
+<tt class="descclassname">srcLRparsing.formula_utils.</tt><tt class="descname">propagate_negation_unary</tt><big>(</big><em>unary_parsetree_list</em><big>)</big><a class="reference internal" href="_modules/srcLRparsing/formula_utils.html#propagate_negation_unary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#srcLRparsing.formula_utils.propagate_negation_unary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Propagate negation in one step on unary formulae
+:param unary_parsetree_list: List tree representation of the string formula
+:return: List parsetree list with negation propagated one step</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="srcLRparsing.formula_utils.remove_implications_recursive">
+<tt class="descclassname">srcLRparsing.formula_utils.</tt><tt class="descname">remove_implications_recursive</tt><big>(</big><em>parsetree_list</em><big>)</big><a class="reference internal" href="_modules/srcLRparsing/formula_utils.html#remove_implications_recursive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#srcLRparsing.formula_utils.remove_implications_recursive" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parsetree_list</strong> &#8211; List tree representation of the string formula</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">List new parsetree list with no implications</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="srcLRparsing.formula_utils.sort_recursive">
+<tt class="descclassname">srcLRparsing.formula_utils.</tt><tt class="descname">sort_recursive</tt><big>(</big><em>parsetree_list</em><big>)</big><a class="reference internal" href="_modules/srcLRparsing/formula_utils.html#sort_recursive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#srcLRparsing.formula_utils.sort_recursive" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parsetree_list</strong> &#8211; List tree representation of the string formula</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">List tree representation of the string formula with conjunctions and disjunctions sorted in lexicographic order</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="grammar-py">
+<h2>grammar.py<a class="headerlink" href="#grammar-py" title="Permalink to this headline">¶</a></h2>
+<p>Grammar implementation</p>
+<span class="target" id="module-srcLRparsing.grammar"></span><dl class="function">
+<dt id="srcLRparsing.grammar.get_parsetree_string">
+<tt class="descclassname">srcLRparsing.grammar.</tt><tt class="descname">get_parsetree_string</tt><big>(</big><em>parse_tree</em><big>)</big><a class="reference internal" href="_modules/srcLRparsing/grammar.html#get_parsetree_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#srcLRparsing.grammar.get_parsetree_string" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parse_tree</strong> &#8211; Tuple parse tree from grammar.parse_formula</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">String parse tree representation as string</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="srcLRparsing.grammar.parse_formula">
+<tt class="descclassname">srcLRparsing.grammar.</tt><tt class="descname">parse_formula</tt><big>(</big><em>formula_string</em><big>)</big><a class="reference internal" href="_modules/srcLRparsing/grammar.html#parse_formula"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#srcLRparsing.grammar.parse_formula" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>formula_string</strong> &#8211; String formula to be parsed with grammar</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Tuple parse tree</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="tableau-py">
+<h2>tableau.py<a class="headerlink" href="#tableau-py" title="Permalink to this headline">¶</a></h2>
+<p>PC-Tableaux implementation</p>
+<span class="target" id="module-srcLRparsing.tableau"></span><dl class="function">
+<dt id="srcLRparsing.tableau.apply_alpha_rules">
+<tt class="descclassname">srcLRparsing.tableau.</tt><tt class="descname">apply_alpha_rules</tt><big>(</big><em>tableaux_dict</em>, <em>belief</em><big>)</big><a class="reference internal" href="_modules/srcLRparsing/tableau.html#apply_alpha_rules"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#srcLRparsing.tableau.apply_alpha_rules" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>tableaux_dict</strong> &#8211; Dict tableaux dict structure with a list of tableau and some global attributes</li>
+<li><strong>belief</strong> &#8211; Boolean if it is to use logic of belief</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Dict of tableaux with all alpha rules applied to its branches in tableaux_dict[&#8216;tableaux&#8217;]</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="srcLRparsing.tableau.apply_beta_rules">
+<tt class="descclassname">srcLRparsing.tableau.</tt><tt class="descname">apply_beta_rules</tt><big>(</big><em>tableaux_dict</em><big>)</big><a class="reference internal" href="_modules/srcLRparsing/tableau.html#apply_beta_rules"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#srcLRparsing.tableau.apply_beta_rules" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>tableaux_dict</strong> &#8211; Dict tableaux dict structure with a list of tableau and some global attributes</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Dict of tableaux with all beta rules applied to its branches in tableaux_dict[&#8216;tableaux&#8217;]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="srcLRparsing.tableau.build_initial_tableau">
+<tt class="descclassname">srcLRparsing.tableau.</tt><tt class="descname">build_initial_tableau</tt><big>(</big><em>formula_list</em><big>)</big><a class="reference internal" href="_modules/srcLRparsing/tableau.html#build_initial_tableau"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#srcLRparsing.tableau.build_initial_tableau" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>formula_list</strong> &#8211; List list of parsetree_list representing all initial formulas in NNF</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Dict of tableaux with all rules applied to its branchs in tableaux_dict[&#8216;tableaux&#8217;]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="srcLRparsing.tableau.get_subformula_complete">
+<tt class="descclassname">srcLRparsing.tableau.</tt><tt class="descname">get_subformula_complete</tt><big>(</big><em>tableaux_dict</em><big>)</big><a class="reference internal" href="_modules/srcLRparsing/tableau.html#get_subformula_complete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#srcLRparsing.tableau.get_subformula_complete" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>tableaux_dict</strong> &#8211; Dict tableaux dict structure with a list of tableau and some global attributes</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Dict of tableaux with all its branches as subformula complete</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="srcLRparsing.tableau.get_tableaux">
+<tt class="descclassname">srcLRparsing.tableau.</tt><tt class="descname">get_tableaux</tt><big>(</big><em>formula_list</em>, <em>belief</em><big>)</big><a class="reference internal" href="_modules/srcLRparsing/tableau.html#get_tableaux"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#srcLRparsing.tableau.get_tableaux" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>formula_list</strong> &#8211; List list of parsetree_list representing all initial formulas in NNF</li>
+<li><strong>belief</strong> &#8211; Boolean if it is to use logic of belief</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">List of tableaux with all rules applied to its branches</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="srcLRparsing.tableau.is_proper">
+<tt class="descclassname">srcLRparsing.tableau.</tt><tt class="descname">is_proper</tt><big>(</big><em>tableau</em><big>)</big><a class="reference internal" href="_modules/srcLRparsing/tableau.html#is_proper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#srcLRparsing.tableau.is_proper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loop through formulae in reverse mode. Based on tableau construction, small formulae should be at the end of it
+:param tableau: Dict tableau dict structure with a list of formulae and some attributes
+:return: Boolean  True if is proper, False otherwise</p>
+</dd></dl>
+
+</div>
+<div class="section" id="graph-py">
+<h2>graph.py<a class="headerlink" href="#graph-py" title="Permalink to this headline">¶</a></h2>
+<p>Tableau structure implementation</p>
+<span class="target" id="module-srcLRparsing.graph"></span><dl class="function">
+<dt id="srcLRparsing.graph.build_states">
+<tt class="descclassname">srcLRparsing.graph.</tt><tt class="descname">build_states</tt><big>(</big><em>tableaux_list</em><big>)</big><a class="reference internal" href="_modules/srcLRparsing/graph.html#build_states"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#srcLRparsing.graph.build_states" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>tableaux_list</strong> &#8211; List list of tableau dicts structure with a list of formulae</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">List a list of states labelled by their index with all formulae as a list of parsetree list</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="srcLRparsing.graph.draw_graph">
+<tt class="descclassname">srcLRparsing.graph.</tt><tt class="descname">draw_graph</tt><big>(</big><em>G</em>, <em>idx</em><big>)</big><a class="reference internal" href="_modules/srcLRparsing/graph.html#draw_graph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#srcLRparsing.graph.draw_graph" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>G</strong> &#8211; NetworkX graph</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="srcLRparsing.graph.get_graph">
+<tt class="descclassname">srcLRparsing.graph.</tt><tt class="descname">get_graph</tt><big>(</big><em>tableaux_list</em>, <em>idx</em>, <em>belief</em><big>)</big><a class="reference internal" href="_modules/srcLRparsing/graph.html#get_graph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#srcLRparsing.graph.get_graph" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>tableaux_list</strong> &#8211; List list of tableau dict structure with a list of tableau and some global attributes</li>
+<li><strong>idx</strong> &#8211; Int index of the graph</li>
+<li><strong>belief</strong> &#8211; Boolean if it is to use logic of belief</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Dict containing the states list, next time relation list and knowledge relation list</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Documentation for the Code</a><ul>
+<li><a class="reference internal" href="#formula-utils-py">formula_utils.py</a></li>
+<li><a class="reference internal" href="#grammar-py">grammar.py</a></li>
+<li><a class="reference internal" href="#tableau-py">tableau.py</a></li>
+<li><a class="reference internal" href="#graph-py">graph.py</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/code.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">TableauVerifier 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Thiago Vieira.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>
