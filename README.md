@@ -1,7 +1,7 @@
 Instructions
 =====
 
-**Documentation** [https://epistemictableau.herokuapp.com](https://epistemictableau.herokuapp.com)
+**Documentation** [http://tcvieira.github.io/tableau](http://tcvieira.github.io/tableau)
 
 Connectives
 -----------
