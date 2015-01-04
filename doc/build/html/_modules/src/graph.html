@@ -1,0 +1,347 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>src.graph &mdash; TableauVerifier 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="TableauVerifier 1.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">TableauVerifier 1.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for src.graph</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">deque</span>
+
+<span class="kn">import</span> <span class="nn">networkx</span> <span class="kn">as</span> <span class="nn">nx</span>
+
+<span class="kn">from</span> <span class="nn">formula_utils</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">tableau</span> <span class="kn">import</span> <span class="n">get_tableaux</span>
+
+<span class="c">#try:</span>
+<span class="c">#    import matplotlib.pyplot as plt</span>
+<span class="c">#except:</span>
+<span class="c">#    raise</span>
+
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;thiagovieira&#39;</span>
+
+
+<div class="viewcode-block" id="build_states"><a class="viewcode-back" href="../../code.html#src.graph.build_states">[docs]</a><span class="k">def</span> <span class="nf">build_states</span><span class="p">(</span><span class="n">tableaux_list</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    :param tableaux_list: List list of tableau dicts structure with a list of formulae</span>
+<span class="sd">    :return: List a list of states labelled by their index with all formulae as a list of parsetree list</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">states</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">agents_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">tableau</span> <span class="ow">in</span> <span class="n">tableaux_list</span><span class="p">:</span>
+        <span class="n">new_state</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">formula</span> <span class="ow">in</span> <span class="n">tableau</span><span class="p">[</span><span class="s">&#39;formulae&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">is_knowledge</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">])</span> <span class="ow">or</span> <span class="n">is_negated_unary_or_atom</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">],</span><span class="s">&#39;knowledge&#39;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">is_knowledge</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]):</span>
+                    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">:])</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">agents_list</span><span class="p">:</span>
+                        <span class="n">agents_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">:]))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">:])</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">agents_list</span><span class="p">:</span>
+                        <span class="n">agents_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">:]))</span>
+            <span class="n">new_state</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&#39;formula&#39;</span><span class="p">:</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">],</span> <span class="s">&#39;k_visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span> <span class="s">&#39;b_visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span> <span class="s">&#39;n_visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">})</span>
+        <span class="n">states</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_state</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">states</span><span class="p">,</span> <span class="n">agents_list</span>
+
+</div>
+<span class="k">def</span> <span class="nf">build_successors</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">belief</span><span class="p">):</span>
+    <span class="k">while</span> <span class="n">G</span><span class="o">.</span><span class="n">graph</span><span class="p">[</span><span class="s">&#39;modified&#39;</span><span class="p">]:</span>
+        <span class="n">G</span><span class="o">.</span><span class="n">graph</span><span class="p">[</span><span class="s">&#39;modified&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">G</span> <span class="o">=</span> <span class="n">build_knowledge_sucessors</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">belief</span><span class="p">)</span>
+        <span class="n">G</span> <span class="o">=</span> <span class="n">build_temporal_sucessors</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">belief</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">G</span>
+
+
+<span class="k">def</span> <span class="nf">contract</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">belief</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">G</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">G</span><span class="o">.</span><span class="n">node</span><span class="p">[</span><span class="n">node</span><span class="p">][</span><span class="s">&#39;contract_visited&#39;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">formula</span> <span class="ow">in</span> <span class="n">G</span><span class="o">.</span><span class="n">node</span><span class="p">[</span><span class="n">node</span><span class="p">][</span><span class="s">&#39;formulae&#39;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">is_eventually</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">])</span> <span class="ow">or</span> <span class="n">is_until</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]))</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_resolvable</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">],</span> <span class="n">belief</span><span class="p">):</span>
+                    <span class="n">G</span><span class="o">.</span><span class="n">remove_node</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+                    <span class="n">G</span><span class="o">.</span><span class="n">graph</span><span class="p">[</span><span class="s">&#39;modified&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="k">return</span> <span class="n">G</span>
+                <span class="k">if</span> <span class="n">is_next</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]):</span>
+                    <span class="n">has_n_successor</span> <span class="o">=</span> <span class="bp">False</span>
+                    <span class="k">for</span> <span class="n">successor</span> <span class="ow">in</span> <span class="n">G</span><span class="p">[</span><span class="n">node</span><span class="p">]:</span>
+                        <span class="k">if</span> <span class="n">G</span><span class="p">[</span><span class="n">node</span><span class="p">][</span><span class="n">successor</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s">&#39;label&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;n&#39;</span><span class="p">:</span>
+                            <span class="n">has_n_successor</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">has_n_successor</span><span class="p">:</span>
+                        <span class="n">G</span><span class="o">.</span><span class="n">remove_node</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+                        <span class="n">G</span><span class="o">.</span><span class="n">graph</span><span class="p">[</span><span class="s">&#39;modified&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                        <span class="k">return</span> <span class="n">G</span>
+                <span class="k">if</span> <span class="n">is_negated_unary_or_atom</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">],</span><span class="s">&#39;knowledge&#39;</span><span class="p">):</span>
+                    <span class="n">label</span> <span class="o">=</span> <span class="s">&#39;R&#39;</span><span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">:])</span>
+                    <span class="n">has_label_successor</span> <span class="o">=</span> <span class="bp">False</span>
+                    <span class="k">for</span> <span class="n">successor</span> <span class="ow">in</span> <span class="n">G</span><span class="p">[</span><span class="n">node</span><span class="p">]:</span>
+                        <span class="n">parsetree_list</span> <span class="o">=</span> <span class="n">sort_recursive</span><span class="p">(</span><span class="n">get_NNF_recursive</span><span class="p">(</span><span class="n">get_negation</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">])))</span> <span class="c">#inside formula of a negated knowledge formula may not be in NNF</span>
+                        <span class="k">if</span> <span class="n">belief</span><span class="p">:</span>
+                            <span class="n">formula_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;formula&#39;</span><span class="p">:</span><span class="n">parsetree_list</span><span class="p">,</span> <span class="s">&#39;k_visited&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span> <span class="s">&#39;b_visited&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span> <span class="s">&#39;n_visited&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">}</span> <span class="c">#watch this</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">formula_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;formula&#39;</span><span class="p">:</span><span class="n">parsetree_list</span><span class="p">,</span> <span class="s">&#39;k_visited&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span> <span class="s">&#39;b_visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span> <span class="s">&#39;n_visited&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">}</span> <span class="c">#watch this</span>
+                        <span class="k">if</span> <span class="n">G</span><span class="p">[</span><span class="n">node</span><span class="p">][</span><span class="n">successor</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s">&#39;label&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">label</span> <span class="ow">and</span> <span class="n">formula_dict</span> <span class="ow">in</span> <span class="n">G</span><span class="o">.</span><span class="n">node</span><span class="p">[</span><span class="n">successor</span><span class="p">][</span><span class="s">&#39;formulae&#39;</span><span class="p">]:</span>
+                            <span class="n">has_label_successor</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">has_label_successor</span><span class="p">:</span>
+                        <span class="n">G</span><span class="o">.</span><span class="n">remove_node</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+                        <span class="n">G</span><span class="o">.</span><span class="n">graph</span><span class="p">[</span><span class="s">&#39;modified&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                        <span class="k">return</span> <span class="n">G</span>
+                <span class="k">if</span> <span class="n">belief</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">is_knowledge</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]):</span>
+                        <span class="n">label</span> <span class="o">=</span> <span class="s">&#39;R&#39;</span><span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">:])</span>
+                        <span class="n">has_label_successor</span> <span class="o">=</span> <span class="bp">False</span>
+                        <span class="k">for</span> <span class="n">successor</span> <span class="ow">in</span> <span class="n">G</span><span class="p">[</span><span class="n">node</span><span class="p">]:</span>
+                            <span class="n">formula_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;formula&#39;</span><span class="p">:</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="s">&#39;k_visited&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span> <span class="s">&#39;b_visited&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span> <span class="s">&#39;n_visited&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">}</span> <span class="c">#watch this</span>
+                            <span class="k">if</span> <span class="n">G</span><span class="p">[</span><span class="n">node</span><span class="p">][</span><span class="n">successor</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s">&#39;label&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">label</span> <span class="ow">and</span> <span class="n">formula_dict</span> <span class="ow">in</span> <span class="n">G</span><span class="o">.</span><span class="n">node</span><span class="p">[</span><span class="n">successor</span><span class="p">][</span><span class="s">&#39;formulae&#39;</span><span class="p">]:</span>
+                                <span class="n">has_label_successor</span> <span class="o">=</span> <span class="bp">True</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">has_label_successor</span><span class="p">:</span>
+                            <span class="n">G</span><span class="o">.</span><span class="n">remove_node</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+                            <span class="n">G</span><span class="o">.</span><span class="n">graph</span><span class="p">[</span><span class="s">&#39;modified&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                            <span class="k">return</span> <span class="n">G</span>
+    <span class="k">return</span> <span class="n">G</span>
+
+
+
+<span class="k">def</span> <span class="nf">is_resolvable</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">formula</span><span class="p">,</span> <span class="n">belief</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">is_eventually</span><span class="p">(</span><span class="n">formula</span><span class="p">):</span>
+        <span class="n">check_formula</span> <span class="o">=</span> <span class="n">formula</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span> <span class="c">#is_until</span>
+        <span class="n">check_formula</span> <span class="o">=</span> <span class="n">formula</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">belief</span><span class="p">:</span>
+        <span class="n">check_formula_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;formula&#39;</span><span class="p">:</span><span class="n">check_formula</span><span class="p">,</span> <span class="s">&#39;k_visited&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span> <span class="s">&#39;b_visited&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span> <span class="s">&#39;n_visited&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">check_formula_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;formula&#39;</span><span class="p">:</span><span class="n">check_formula</span><span class="p">,</span> <span class="s">&#39;k_visited&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span> <span class="s">&#39;b_visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span> <span class="s">&#39;n_visited&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">}</span>
+    <span class="k">return</span> <span class="n">temporal_bfs</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">check_formula_dict</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">temporal_bfs</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">check_formula_dict</span><span class="p">):</span>
+    <span class="n">queue</span> <span class="o">=</span> <span class="n">deque</span><span class="p">([])</span>
+    <span class="n">visited</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">visited</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+    <span class="n">queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+    <span class="k">while</span> <span class="n">queue</span><span class="p">:</span>
+        <span class="n">current_node</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">check_formula_dict</span> <span class="ow">in</span> <span class="n">G</span><span class="o">.</span><span class="n">node</span><span class="p">[</span><span class="n">current_node</span><span class="p">][</span><span class="s">&#39;formulae&#39;</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">for</span> <span class="n">successor</span> <span class="ow">in</span> <span class="n">G</span><span class="p">[</span><span class="n">current_node</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">G</span><span class="p">[</span><span class="n">current_node</span><span class="p">][</span><span class="n">successor</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s">&#39;label&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;n&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">successor</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">visited</span><span class="p">:</span>
+                    <span class="n">visited</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">successor</span><span class="p">)</span>
+                    <span class="n">queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">successor</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">continue</span>
+    <span class="k">return</span> <span class="bp">False</span>
+
+
+<span class="k">def</span> <span class="nf">build_knowledge_sucessors</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">belief</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">G</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">formula</span> <span class="ow">in</span> <span class="n">G</span><span class="o">.</span><span class="n">node</span><span class="p">[</span><span class="n">node</span><span class="p">][</span><span class="s">&#39;formulae&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">formula</span><span class="p">[</span><span class="s">&#39;k_visited&#39;</span><span class="p">]:</span>
+                <span class="n">formula</span><span class="p">[</span><span class="s">&#39;k_visited&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">if</span> <span class="n">is_negated_unary_or_atom</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">],</span><span class="s">&#39;knowledge&#39;</span><span class="p">):</span>
+                    <span class="n">new_state_formula_list</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">idx</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">:])</span> <span class="c">#index of the knowledge formula</span>
+                    <span class="n">G</span><span class="o">.</span><span class="n">node</span><span class="p">[</span><span class="n">node</span><span class="p">][</span><span class="s">&#39;has_negated_k&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+                    <span class="n">new_state_formula_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sort_recursive</span><span class="p">(</span><span class="n">get_NNF_recursive</span><span class="p">(</span><span class="n">get_negation</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]))))</span> <span class="c">#inside formula of a negated knowledge formula may not be in NNF</span>
+                    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">G</span><span class="o">.</span><span class="n">node</span><span class="p">[</span><span class="n">node</span><span class="p">][</span><span class="s">&#39;formulae&#39;</span><span class="p">]:</span>
+                        <span class="k">if</span> <span class="n">is_knowledge</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">])</span> <span class="ow">and</span> <span class="nb">str</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">:])</span> <span class="o">==</span> <span class="n">idx</span> <span class="ow">and</span> <span class="n">f</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">new_state_formula_list</span><span class="p">:</span>
+                            <span class="n">new_state_formula_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">])</span>
+                            <span class="n">new_state_formula_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+                        <span class="k">if</span>  <span class="n">is_negated_unary_or_atom</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">],</span> <span class="s">&#39;knowledge&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">str</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">:])</span> <span class="o">==</span> <span class="n">idx</span> <span class="ow">and</span> <span class="n">f</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">new_state_formula_list</span><span class="p">:</span>
+                            <span class="n">new_state_formula_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">])</span>
+                    <span class="n">new_state_pc_tableaux</span> <span class="o">=</span> <span class="n">get_tableaux</span><span class="p">(</span><span class="n">new_state_formula_list</span><span class="p">,</span> <span class="n">belief</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">new_state_pc_tableaux</span><span class="p">:</span>
+                        <span class="n">new_states</span><span class="p">,</span> <span class="n">agents_list</span> <span class="o">=</span> <span class="n">build_states</span><span class="p">(</span><span class="n">new_state_pc_tableaux</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">state</span> <span class="ow">in</span> <span class="n">new_states</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">G</span><span class="p">:</span>
+                                <span class="n">G</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="p">),</span> <span class="n">formulae</span><span class="o">=</span><span class="n">state</span><span class="p">,</span> <span class="n">contract_visited</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">has_negated_k</span><span class="o">=</span><span class="p">[])</span>
+                            <span class="k">if</span> <span class="p">(</span><span class="n">node</span><span class="p">,</span><span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="p">))</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">G</span><span class="o">.</span><span class="n">edges</span><span class="p">():</span>
+                                <span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">node</span><span class="p">,</span><span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s">&#39;R&#39;</span><span class="o">+</span><span class="n">idx</span><span class="p">)</span>
+                        <span class="n">G</span><span class="o">.</span><span class="n">graph</span><span class="p">[</span><span class="s">&#39;modified&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                        <span class="k">return</span> <span class="n">G</span>
+        <span class="k">if</span> <span class="n">belief</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">formula</span> <span class="ow">in</span> <span class="n">G</span><span class="o">.</span><span class="n">node</span><span class="p">[</span><span class="n">node</span><span class="p">][</span><span class="s">&#39;formulae&#39;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">formula</span><span class="p">[</span><span class="s">&#39;b_visited&#39;</span><span class="p">]:</span>
+                    <span class="n">formula</span><span class="p">[</span><span class="s">&#39;b_visited&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="k">if</span> <span class="n">is_knowledge</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">])</span> <span class="ow">and</span> <span class="nb">str</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">G</span><span class="o">.</span><span class="n">node</span><span class="p">[</span><span class="n">node</span><span class="p">][</span><span class="s">&#39;has_negated_k&#39;</span><span class="p">]:</span>
+                        <span class="n">new_state_formula_list</span> <span class="o">=</span> <span class="p">[]</span>
+                        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">G</span><span class="o">.</span><span class="n">node</span><span class="p">[</span><span class="n">node</span><span class="p">][</span><span class="s">&#39;formulae&#39;</span><span class="p">]:</span>
+                            <span class="k">if</span> <span class="n">is_knowledge</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">])</span> <span class="ow">and</span> <span class="nb">str</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">:])</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">:])</span> <span class="ow">and</span> <span class="n">f</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">new_state_formula_list</span><span class="p">:</span>
+                                <span class="n">new_state_formula_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">])</span>
+                                <span class="n">new_state_formula_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+                        <span class="n">new_state_pc_tableaux</span> <span class="o">=</span> <span class="n">get_tableaux</span><span class="p">(</span><span class="n">new_state_formula_list</span><span class="p">,</span> <span class="n">belief</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">new_state_pc_tableaux</span><span class="p">:</span>
+                            <span class="n">new_states</span><span class="p">,</span> <span class="n">agents_list</span> <span class="o">=</span> <span class="n">build_states</span><span class="p">(</span><span class="n">new_state_pc_tableaux</span><span class="p">)</span>
+                            <span class="k">for</span> <span class="n">state</span> <span class="ow">in</span> <span class="n">new_states</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">G</span><span class="p">:</span>
+                                    <span class="n">G</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="p">),</span> <span class="n">formulae</span><span class="o">=</span><span class="n">state</span><span class="p">,</span> <span class="n">contract_visited</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">has_negated_k</span><span class="o">=</span><span class="p">[])</span>
+                                <span class="k">if</span> <span class="p">(</span><span class="n">node</span><span class="p">,</span><span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="p">))</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">G</span><span class="o">.</span><span class="n">edges</span><span class="p">():</span>
+                                    <span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">node</span><span class="p">,</span><span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s">&#39;R&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">:]))</span>
+                            <span class="n">G</span><span class="o">.</span><span class="n">graph</span><span class="p">[</span><span class="s">&#39;modified&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                            <span class="k">return</span> <span class="n">G</span>
+    <span class="k">return</span> <span class="n">G</span>
+
+
+<span class="k">def</span> <span class="nf">build_temporal_sucessors</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">belief</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">G</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">formula</span> <span class="ow">in</span> <span class="n">G</span><span class="o">.</span><span class="n">node</span><span class="p">[</span><span class="n">node</span><span class="p">][</span><span class="s">&#39;formulae&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">formula</span><span class="p">[</span><span class="s">&#39;n_visited&#39;</span><span class="p">]:</span>
+                <span class="n">formula</span><span class="p">[</span><span class="s">&#39;n_visited&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">if</span> <span class="n">is_next</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]):</span>
+                    <span class="n">new_state_formula_list</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">new_state_formula_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">G</span><span class="o">.</span><span class="n">node</span><span class="p">[</span><span class="n">node</span><span class="p">][</span><span class="s">&#39;formulae&#39;</span><span class="p">]:</span>
+                        <span class="k">if</span> <span class="n">is_next</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">])</span> <span class="ow">and</span> <span class="n">f</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">new_state_formula_list</span><span class="p">:</span>
+                            <span class="n">new_state_formula_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="n">new_state_pc_tableaux</span> <span class="o">=</span> <span class="n">get_tableaux</span><span class="p">(</span><span class="n">new_state_formula_list</span><span class="p">,</span> <span class="n">belief</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">new_state_pc_tableaux</span><span class="p">:</span>
+                        <span class="n">new_states</span><span class="p">,</span> <span class="n">agents_list</span> <span class="o">=</span> <span class="n">build_states</span><span class="p">(</span><span class="n">new_state_pc_tableaux</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">state</span> <span class="ow">in</span> <span class="n">new_states</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">G</span><span class="p">:</span>
+                                <span class="n">G</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="p">),</span> <span class="n">formulae</span><span class="o">=</span><span class="n">state</span><span class="p">,</span> <span class="n">contract_visited</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">has_negated_k</span><span class="o">=</span><span class="p">[])</span>
+                            <span class="k">if</span> <span class="p">(</span><span class="n">node</span><span class="p">,</span><span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="p">))</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">G</span><span class="o">.</span><span class="n">edges</span><span class="p">():</span>
+                                <span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">node</span><span class="p">,</span><span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s">&#39;n&#39;</span><span class="p">)</span>
+                        <span class="n">G</span><span class="o">.</span><span class="n">graph</span><span class="p">[</span><span class="s">&#39;modified&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                        <span class="k">return</span> <span class="n">G</span>
+    <span class="k">return</span> <span class="n">G</span>
+
+
+<div class="viewcode-block" id="get_graph"><a class="viewcode-back" href="../../code.html#src.graph.get_graph">[docs]</a><span class="k">def</span> <span class="nf">get_graph</span><span class="p">(</span><span class="n">tableaux_list</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">belief</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    :param tableaux_list: List list of tableau dict structure with a list of tableau and some global attributes</span>
+<span class="sd">    :param idx: Int index of the graph</span>
+<span class="sd">    :param belief: Boolean if it is to use logic of belief</span>
+<span class="sd">    :return: Dict containing the states list, next time relation list and knowledge relation list</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">tableaux_list</span><span class="p">:</span>
+        <span class="n">states</span><span class="p">,</span> <span class="n">agents_list</span> <span class="o">=</span> <span class="n">build_states</span><span class="p">(</span><span class="n">tableaux_list</span><span class="p">)</span>
+        <span class="n">MDG</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">MultiDiGraph</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;Tableau Graph&#39;</span><span class="p">,</span> <span class="n">modified</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">agents_list</span><span class="o">=</span><span class="n">agents_list</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">state</span> <span class="ow">in</span> <span class="n">states</span><span class="p">:</span>
+            <span class="n">MDG</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="p">),</span> <span class="n">formulae</span><span class="o">=</span><span class="n">state</span><span class="p">,</span> <span class="n">contract_visited</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">has_negated_k</span><span class="o">=</span><span class="p">[])</span>
+        <span class="n">MDG</span> <span class="o">=</span> <span class="n">build_successors</span><span class="p">(</span><span class="n">MDG</span><span class="p">,</span> <span class="n">belief</span><span class="p">)</span>
+        <span class="n">MDG</span><span class="o">.</span><span class="n">graph</span><span class="p">[</span><span class="s">&#39;modified&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">draw_graph</span><span class="p">(</span><span class="n">MDG</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span>
+        <span class="k">while</span> <span class="n">MDG</span><span class="o">.</span><span class="n">graph</span><span class="p">[</span><span class="s">&#39;modified&#39;</span><span class="p">]:</span>
+            <span class="n">MDG</span><span class="o">.</span><span class="n">graph</span><span class="p">[</span><span class="s">&#39;modified&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="n">MDG</span> <span class="o">=</span> <span class="n">contract</span><span class="p">(</span><span class="n">MDG</span><span class="p">,</span><span class="n">belief</span><span class="p">)</span>
+        <span class="c">#print &#39;nodes: &#39; + str(MDG.nodes())</span>
+        <span class="c">#print &#39;edges: &#39; + str(MDG.edges())</span>
+        <span class="k">print</span> <span class="n">nx</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">MDG</span><span class="p">)</span>
+        <span class="k">print</span> <span class="s">&#39;nodes:&#39;</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">MDG</span><span class="p">):</span>
+            <span class="k">print</span> <span class="nb">str</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;: &#39;</span><span class="p">,</span>
+            <span class="k">for</span> <span class="n">formula</span> <span class="ow">in</span> <span class="n">MDG</span><span class="o">.</span><span class="n">node</span><span class="p">[</span><span class="n">node</span><span class="p">][</span><span class="s">&#39;formulae&#39;</span><span class="p">]:</span>
+                <span class="k">print</span> <span class="nb">str</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="s">&#39;,&#39;</span><span class="p">,</span>
+            <span class="k">print</span>
+        <span class="n">draw_graph</span><span class="p">(</span><span class="n">MDG</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">print</span> <span class="s">&#39;this tableaux is not proper&#39;</span>
+
+</div>
+<div class="viewcode-block" id="draw_graph"><a class="viewcode-back" href="../../code.html#src.graph.draw_graph">[docs]</a><span class="k">def</span> <span class="nf">draw_graph</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    :param G: NetworkX graph</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">convert_node_labels_to_integers</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
+    <span class="c">#font = {&#39;fontname&#39;   : &#39;Perpetua&#39;,</span>
+    <span class="c">#        &#39;color&#39;      : &#39;k&#39;,</span>
+    <span class="c">#        &#39;fontweight&#39; : &#39;bold&#39;,</span>
+    <span class="c">#        &#39;fontsize&#39;   : 14}</span>
+    <span class="c">#plt.title(&#39;Tableau Graph &#39; + str(idx), font)</span>
+    <span class="c">#try:</span>
+    <span class="c">#    pos=nx.graphviz_layout(G)</span>
+    <span class="c">#except:</span>
+    <span class="c">#    pos=nx.spring_layout(G)</span>
+    <span class="c">#nx.draw_networkx_nodes(G,pos,node_color=&#39;black&#39;,alpha=0.4, node_size=500)</span>
+    <span class="c">#nx.draw_networkx_edges(G,pos,alpha=0.5,width=1.0)</span>
+    <span class="c">#nx.draw_networkx_labels(G, pos, fontsize=14)</span>
+    <span class="c">#nx.draw_networkx_edge_labels(G, pos)</span>
+    <span class="c">#plt.axis(&#39;off&#39;)</span>
+    <span class="c">#plt.savefig(&#39;img/&#39; + str(idx) + &#39;.png&#39;)</span>
+    <span class="n">aG</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">to_agraph</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
+    <span class="n">aG</span><span class="o">.</span><span class="n">layout</span><span class="p">(</span><span class="n">prog</span><span class="o">=</span><span class="s">&#39;dot&#39;</span><span class="p">)</span>
+    <span class="c">#aG.write(&#39;img/graphviz_&#39; + str(idx) + &#39;.dot&#39;)</span>
+    <span class="n">aG</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="s">&#39;img/graphviz_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;.png&#39;</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">TableauVerifier 1.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Thiago Vieira.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

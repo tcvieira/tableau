@@ -1,5 +1,5 @@
 __author__ = 'thiagovieira'
 
-import srcLRparsing.grammar
-import srcLRparsing.tableau
-import srcLRparsing.graph
+import src.grammar
+import src.tableau
+import src.graph

@@ -1,0 +1,390 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>src.tableau &mdash; TableauVerifier 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="TableauVerifier 1.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">TableauVerifier 1.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for src.tableau</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">gc</span>
+
+<span class="kn">from</span> <span class="nn">formula_utils</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">utils</span> <span class="kn">import</span> <span class="n">new_deepcopy</span>
+
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;thiagovieira&#39;</span>
+
+
+<div class="viewcode-block" id="build_initial_tableau"><a class="viewcode-back" href="../../code.html#src.tableau.build_initial_tableau">[docs]</a><span class="k">def</span> <span class="nf">build_initial_tableau</span><span class="p">(</span><span class="n">formula_list</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    :param formula_list: List list of parsetree_list representing all initial formulas in NNF</span>
+<span class="sd">    :return: Dict of tableaux with all rules applied to its branchs in tableaux_dict[&#39;tableaux&#39;]</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">formulae</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">formula</span> <span class="ow">in</span> <span class="n">formula_list</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">formulae</span> <span class="k">if</span> <span class="n">f</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">formula</span><span class="p">]:</span>  <span class="c"># check duplicate</span>
+            <span class="n">formula_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;formula&#39;</span><span class="p">:</span> <span class="n">formula</span><span class="p">,</span> <span class="s">&#39;alpha-visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                            <span class="s">&#39;beta-visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                            <span class="s">&#39;sub-complete-visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">}</span>
+            <span class="n">formulae</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">formula_dict</span><span class="p">)</span>
+    <span class="n">tableau_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;formulae&#39;</span><span class="p">:</span> <span class="n">formulae</span><span class="p">,</span> <span class="s">&#39;is_proper&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                    <span class="s">&#39;was_modified&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">}</span>
+    <span class="n">tableaux</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">tableaux</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tableau_dict</span><span class="p">)</span>
+    <span class="n">tableaux_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;tableaux&#39;</span><span class="p">:</span> <span class="n">tableaux</span><span class="p">,</span> <span class="s">&#39;was_modified&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">}</span>
+    <span class="k">if</span> <span class="n">is_proper</span><span class="p">(</span><span class="n">tableaux_dict</span><span class="p">[</span><span class="s">&#39;tableaux&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="n">tableaux_dict</span><span class="p">[</span><span class="s">&#39;tableaux&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s">&#39;is_proper&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="n">tableaux_dict</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">None</span>
+
+</div>
+<div class="viewcode-block" id="get_tableaux"><a class="viewcode-back" href="../../code.html#src.tableau.get_tableaux">[docs]</a><span class="k">def</span> <span class="nf">get_tableaux</span><span class="p">(</span><span class="n">formula_list</span><span class="p">,</span> <span class="n">belief</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    :param formula_list: List list of parsetree_list representing all initial formulas in NNF</span>
+<span class="sd">    :param belief: Boolean if it is to use logic of belief</span>
+<span class="sd">    :return: List of tableaux with all rules applied to its branches</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">tableaux_dict</span> <span class="o">=</span> <span class="n">build_initial_tableau</span><span class="p">(</span><span class="n">formula_list</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">tableaux_dict</span><span class="p">:</span>
+        <span class="k">while</span> <span class="n">tableaux_dict</span><span class="p">[</span><span class="s">&#39;was_modified&#39;</span><span class="p">]:</span>
+            <span class="n">tableaux_dict</span><span class="p">[</span><span class="s">&#39;was_modified&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="n">tableaux_dict</span> <span class="o">=</span> <span class="n">apply_alpha_rules</span><span class="p">(</span><span class="n">tableaux_dict</span><span class="p">,</span> <span class="n">belief</span><span class="p">)</span>
+            <span class="n">tableaux_dict</span> <span class="o">=</span> <span class="n">apply_beta_rules</span><span class="p">(</span><span class="n">tableaux_dict</span><span class="p">)</span>
+            <span class="n">tableaux_dict</span> <span class="o">=</span> <span class="n">get_subformula_complete</span><span class="p">(</span><span class="n">tableaux_dict</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tableaux_dict</span><span class="p">[</span><span class="s">&#39;tableaux&#39;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">None</span>
+
+</div>
+<div class="viewcode-block" id="get_subformula_complete"><a class="viewcode-back" href="../../code.html#src.tableau.get_subformula_complete">[docs]</a><span class="k">def</span> <span class="nf">get_subformula_complete</span><span class="p">(</span><span class="n">tableaux_dict</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    :param tableaux_dict: Dict tableaux dict structure with a list of tableau and some global attributes</span>
+<span class="sd">    :return: Dict of tableaux with all its branches as subformula complete</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">for</span> <span class="n">tableau</span> <span class="ow">in</span> <span class="n">tableaux_dict</span><span class="p">[</span><span class="s">&#39;tableaux&#39;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">formula</span> <span class="ow">in</span> <span class="n">tableau</span><span class="p">[</span><span class="s">&#39;formulae&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">is_knowledge</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">])</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">formula</span><span class="p">[</span><span class="s">&#39;sub-complete-visited&#39;</span><span class="p">]:</span>
+                <span class="n">formula</span><span class="p">[</span><span class="s">&#39;sub-complete-visited&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="n">subformulae_parsetree_list</span> <span class="o">=</span> <span class="n">get_subformulae_recursive</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">],</span> <span class="p">[])</span>
+                <span class="k">for</span> <span class="n">sub_parsetree</span> <span class="ow">in</span> <span class="n">subformulae_parsetree_list</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>  <span class="c"># remove the original formula</span>
+                    <span class="k">if</span> <span class="n">is_knowledge</span><span class="p">(</span><span class="n">sub_parsetree</span><span class="p">)</span> <span class="ow">and</span> <span class="n">sub_parsetree</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">:]</span> <span class="o">==</span> <span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">:]:</span>
+                        <span class="n">negated_sub_parsetree</span> <span class="o">=</span> <span class="n">get_negation</span><span class="p">(</span><span class="n">sub_parsetree</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">tableau</span><span class="p">[</span><span class="s">&#39;formulae&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">f</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">sub_parsetree</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">tableau</span><span class="p">[</span><span class="s">&#39;formulae&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">f</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">negated_sub_parsetree</span><span class="p">]):</span>
+                            <span class="n">sub_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;formula&#39;</span><span class="p">:</span> <span class="n">sub_parsetree</span><span class="p">,</span>
+                                        <span class="s">&#39;alpha-visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                                        <span class="s">&#39;beta-visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                                        <span class="s">&#39;sub-complete-visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">}</span>
+                            <span class="n">negated_sub_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;formula&#39;</span><span class="p">:</span> <span class="n">negated_sub_parsetree</span><span class="p">,</span>
+                                        <span class="s">&#39;alpha-visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                                        <span class="s">&#39;beta-visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                                        <span class="s">&#39;sub-complete-visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">}</span>
+                            <span class="n">tableaux_dict</span><span class="p">[</span><span class="s">&#39;was_modified&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                            <span class="n">new_tableau</span> <span class="o">=</span> <span class="n">new_deepcopy</span><span class="p">(</span><span class="n">tableau</span><span class="p">)</span>
+                            <span class="n">tableau</span><span class="p">[</span><span class="s">&#39;formulae&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sub_dict</span><span class="p">)</span>  <span class="c"># added on current tableau</span>
+                            <span class="n">new_tableau</span><span class="p">[</span><span class="s">&#39;formulae&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">negated_sub_dict</span><span class="p">)</span>  <span class="c"># added on a new tableau</span>
+                            <span class="n">tableaux_dict</span><span class="p">[</span><span class="s">&#39;tableaux&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_tableau</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">tableaux_dict</span>
+
+</div>
+<div class="viewcode-block" id="apply_alpha_rules"><a class="viewcode-back" href="../../code.html#src.tableau.apply_alpha_rules">[docs]</a><span class="k">def</span> <span class="nf">apply_alpha_rules</span><span class="p">(</span><span class="n">tableaux_dict</span><span class="p">,</span> <span class="n">belief</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    :param tableaux_dict: Dict tableaux dict structure with a list of tableau and some global attributes</span>
+<span class="sd">    :param belief: Boolean if it is to use logic of belief</span>
+<span class="sd">    :return: Dict of tableaux with all alpha rules applied to its branches in tableaux_dict[&#39;tableaux&#39;]</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">tableau</span> <span class="ow">in</span> <span class="n">tableaux_dict</span><span class="p">[</span><span class="s">&#39;tableaux&#39;</span><span class="p">]:</span>
+        <span class="n">is_proper_tableau</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">for</span> <span class="n">formula</span> <span class="ow">in</span> <span class="n">tableau</span><span class="p">[</span><span class="s">&#39;formulae&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">formula</span><span class="p">[</span><span class="s">&#39;alpha-visited&#39;</span><span class="p">]:</span>
+                <span class="n">formula</span><span class="p">[</span><span class="s">&#39;alpha-visited&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">if</span> <span class="n">is_conjuction</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]):</span>
+                    <span class="n">alpha1_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;formula&#39;</span><span class="p">:</span> <span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+                                   <span class="s">&#39;alpha-visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                                   <span class="s">&#39;beta-visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                                   <span class="s">&#39;sub-complete-visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">}</span>
+                    <span class="n">alpha2_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;formula&#39;</span><span class="p">:</span> <span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">3</span><span class="p">],</span>
+                                   <span class="s">&#39;alpha-visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                                   <span class="s">&#39;beta-visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                                   <span class="s">&#39;sub-complete-visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">}</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">tableau</span><span class="p">[</span><span class="s">&#39;formulae&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">f</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">alpha1_dict</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]]:</span>  <span class="c"># check duplicate</span>
+                        <span class="n">tableau</span><span class="p">[</span><span class="s">&#39;was_modified&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                        <span class="n">tableau</span><span class="p">[</span><span class="s">&#39;formulae&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">alpha1_dict</span><span class="p">)</span>
+                        <span class="n">is_proper_tableau</span> <span class="o">=</span> <span class="n">is_proper</span><span class="p">(</span><span class="n">tableau</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">tableau</span><span class="p">[</span><span class="s">&#39;formulae&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">f</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">alpha2_dict</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]]:</span>  <span class="c"># check duplicate</span>
+                        <span class="n">tableau</span><span class="p">[</span><span class="s">&#39;was_modified&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                        <span class="n">tableau</span><span class="p">[</span><span class="s">&#39;formulae&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">alpha2_dict</span><span class="p">)</span>
+                        <span class="n">is_proper_tableau</span> <span class="o">=</span> <span class="n">is_proper</span><span class="p">(</span><span class="n">tableau</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">is_always</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">])</span> <span class="ow">or</span> <span class="n">is_knowledge</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]):</span>
+                    <span class="k">if</span> <span class="n">is_always</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]):</span>
+                        <span class="n">alpha1</span> <span class="o">=</span> <span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="n">alpha1_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;formula&#39;</span><span class="p">:</span> <span class="n">alpha1</span><span class="p">,</span>
+                                       <span class="s">&#39;alpha-visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                                       <span class="s">&#39;beta-visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                                       <span class="s">&#39;sub-complete-visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">}</span>
+                        <span class="n">alpha2_string</span> <span class="o">=</span> <span class="s">&#39;[</span><span class="se">\&#39;</span><span class="s">N</span><span class="se">\&#39;</span><span class="s">,&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="s">&#39;]&#39;</span>
+                        <span class="n">alpha2</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">alpha2_string</span><span class="p">)</span>
+                        <span class="n">alpha2_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;formula&#39;</span><span class="p">:</span> <span class="n">alpha2</span><span class="p">,</span>
+                                       <span class="s">&#39;alpha-visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                                       <span class="s">&#39;beta-visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                                       <span class="s">&#39;sub-complete-visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">}</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">tableau</span><span class="p">[</span><span class="s">&#39;formulae&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">f</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">alpha1_dict</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]]:</span>  <span class="c"># check duplicate</span>
+                            <span class="n">tableau</span><span class="p">[</span><span class="s">&#39;was_modified&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                            <span class="n">tableau</span><span class="p">[</span><span class="s">&#39;formulae&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">alpha1_dict</span><span class="p">)</span>
+                            <span class="n">is_proper_tableau</span> <span class="o">=</span> <span class="n">is_proper</span><span class="p">(</span><span class="n">tableau</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">tableau</span><span class="p">[</span><span class="s">&#39;formulae&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">f</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">alpha2_dict</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]]:</span>  <span class="c"># check duplicate</span>
+                            <span class="n">tableau</span><span class="p">[</span><span class="s">&#39;was_modified&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                            <span class="n">tableau</span><span class="p">[</span><span class="s">&#39;formulae&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">alpha2_dict</span><span class="p">)</span>
+                            <span class="n">is_proper_tableau</span> <span class="o">=</span> <span class="n">is_proper</span><span class="p">(</span><span class="n">tableau</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>  <span class="c"># is_knowledge</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">belief</span><span class="p">:</span>
+                            <span class="n">tableau</span><span class="p">[</span><span class="s">&#39;was_modified&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                            <span class="n">alpha1</span> <span class="o">=</span> <span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                            <span class="n">alpha1_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;formula&#39;</span><span class="p">:</span> <span class="n">alpha1</span><span class="p">,</span>
+                                           <span class="s">&#39;alpha-visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                                           <span class="s">&#39;beta-visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                                           <span class="s">&#39;sub-complete-visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">}</span>
+                            <span class="k">if</span> <span class="ow">not</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">tableau</span><span class="p">[</span><span class="s">&#39;formulae&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">f</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">alpha1_dict</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]]:</span>  <span class="c"># check duplicate</span>
+                                <span class="n">tableau</span><span class="p">[</span><span class="s">&#39;was_modified&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                                <span class="n">tableau</span><span class="p">[</span><span class="s">&#39;formulae&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">alpha1_dict</span><span class="p">)</span>
+                                <span class="n">is_proper_tableau</span> <span class="o">=</span> <span class="n">is_proper</span><span class="p">(</span><span class="n">tableau</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">is_proper_tableau</span><span class="p">:</span>
+                    <span class="n">tableaux_dict</span><span class="p">[</span><span class="s">&#39;tableaux&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">tableau</span><span class="p">)</span>
+                    <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>  <span class="c"># to avoid list fragmentation</span>
+                    <span class="k">break</span>
+    <span class="k">return</span> <span class="n">tableaux_dict</span>
+
+</div>
+<div class="viewcode-block" id="apply_beta_rules"><a class="viewcode-back" href="../../code.html#src.tableau.apply_beta_rules">[docs]</a><span class="k">def</span> <span class="nf">apply_beta_rules</span><span class="p">(</span><span class="n">tableaux_dict</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    :param tableaux_dict: Dict tableaux dict structure with a list of tableau and some global attributes</span>
+<span class="sd">    :return: Dict of tableaux with all beta rules applied to its branches in tableaux_dict[&#39;tableaux&#39;]</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">tableau</span> <span class="ow">in</span> <span class="n">tableaux_dict</span><span class="p">[</span><span class="s">&#39;tableaux&#39;</span><span class="p">]:</span>
+        <span class="n">is_proper_tableau</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">if</span> <span class="n">tableau</span><span class="p">[</span><span class="s">&#39;was_modified&#39;</span><span class="p">]:</span>
+            <span class="n">tableau</span><span class="p">[</span><span class="s">&#39;was_modified&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">for</span> <span class="n">formula</span> <span class="ow">in</span> <span class="n">tableau</span><span class="p">[</span><span class="s">&#39;formulae&#39;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">formula</span><span class="p">[</span><span class="s">&#39;beta-visited&#39;</span><span class="p">]:</span>
+                    <span class="n">formula</span><span class="p">[</span><span class="s">&#39;beta-visited&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="k">if</span> <span class="n">is_until</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">])</span> <span class="ow">or</span> <span class="n">is_unless</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]):</span>
+                        <span class="n">beta1</span> <span class="o">=</span> <span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span>
+                        <span class="n">beta1_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;formula&#39;</span><span class="p">:</span> <span class="n">beta1</span><span class="p">,</span> <span class="s">&#39;alpha-visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                                      <span class="s">&#39;beta-visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                                      <span class="s">&#39;sub-complete-visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">}</span>
+                        <span class="n">beta2_string</span> <span class="o">=</span> <span class="s">&#39;[[</span><span class="se">\&#39;</span><span class="s">binary</span><span class="se">\&#39;</span><span class="s">,[[</span><span class="se">\&#39;</span><span class="s">binary</span><span class="se">\&#39;</span><span class="s">,[</span><span class="se">\&#39;</span><span class="s">~</span><span class="se">\&#39;</span><span class="s">,&#39;</span> <span class="o">+</span> \
+                                       <span class="nb">str</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">3</span><span class="p">])</span> <span class="o">+</span> <span class="s">&#39;],</span><span class="se">\&#39;</span><span class="s">^</span><span class="se">\&#39;</span><span class="s">,&#39;</span> <span class="o">+</span> \
+                                       <span class="nb">str</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s">&#39;]],</span><span class="se">\&#39;</span><span class="s">^</span><span class="se">\&#39;</span><span class="s">,[</span><span class="se">\&#39;</span><span class="s">N</span><span class="se">\&#39;</span><span class="s">,[&#39;</span> <span class="o">+</span> \
+                                       <span class="nb">str</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s">&#39;]]]]&#39;</span>
+                        <span class="n">beta2</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">beta2_string</span><span class="p">)</span>
+                        <span class="n">beta2_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;formula&#39;</span><span class="p">:</span> <span class="n">get_NNF_recursive</span><span class="p">(</span><span class="n">beta2</span><span class="p">),</span>
+                                      <span class="s">&#39;alpha-visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                                      <span class="s">&#39;beta-visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                                      <span class="s">&#39;sub-complete-visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">}</span>  <span class="c"># as we negate some formula, we have to ensure that it still remain in NNF</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">tableau</span><span class="p">[</span><span class="s">&#39;formulae&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">f</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">beta2_dict</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]]:</span>  <span class="c"># check duplicate</span>
+                            <span class="n">tableaux_dict</span><span class="p">[</span><span class="s">&#39;was_modified&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                            <span class="n">tableau</span><span class="p">[</span><span class="s">&#39;was_modified&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                            <span class="n">new_tableau</span> <span class="o">=</span> <span class="n">new_deepcopy</span><span class="p">(</span><span class="n">tableau</span><span class="p">)</span>
+                            <span class="n">new_tableau</span><span class="p">[</span><span class="s">&#39;formulae&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                                <span class="n">beta2_dict</span><span class="p">)</span>  <span class="c"># added on a new tableau</span>
+                            <span class="k">if</span> <span class="n">is_proper</span><span class="p">(</span><span class="n">new_tableau</span><span class="p">):</span>
+                                <span class="n">tableaux_dict</span><span class="p">[</span><span class="s">&#39;tableaux&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_tableau</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">tableau</span><span class="p">[</span><span class="s">&#39;formulae&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">f</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">beta1_dict</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]]:</span>  <span class="c"># check duplicate</span>
+                            <span class="n">tableaux_dict</span><span class="p">[</span><span class="s">&#39;was_modified&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                            <span class="n">tableau</span><span class="p">[</span><span class="s">&#39;was_modified&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                            <span class="n">tableau</span><span class="p">[</span><span class="s">&#39;formulae&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">beta1_dict</span><span class="p">)</span>  <span class="c"># added on current tableau</span>
+                            <span class="n">is_proper_tableau</span> <span class="o">=</span> <span class="n">is_proper</span><span class="p">(</span><span class="n">tableau</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">is_eventually</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]):</span>
+                        <span class="n">beta1</span> <span class="o">=</span> <span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="n">beta1_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;formula&#39;</span><span class="p">:</span> <span class="n">beta1</span><span class="p">,</span> <span class="s">&#39;alpha-visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                                      <span class="s">&#39;beta-visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                                      <span class="s">&#39;sub-complete-visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">}</span>
+                        <span class="n">beta2_string</span> <span class="o">=</span> <span class="s">&#39;[[</span><span class="se">\&#39;</span><span class="s">binary</span><span class="se">\&#39;</span><span class="s">,[</span><span class="se">\&#39;</span><span class="s">~</span><span class="se">\&#39;</span><span class="s">,&#39;</span> <span class="o">+</span> \
+                                       <span class="nb">str</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s">&#39;],</span><span class="se">\&#39;</span><span class="s">^</span><span class="se">\&#39;</span><span class="s">,&#39;</span> <span class="o">+</span> <span class="s">&#39;[</span><span class="se">\&#39;</span><span class="s">N</span><span class="se">\&#39;</span><span class="s">,&#39;</span> <span class="o">+</span> \
+                                       <span class="nb">str</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="s">&#39;]]]&#39;</span>
+                        <span class="n">beta2</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">beta2_string</span><span class="p">)</span>
+                        <span class="n">beta2_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;formula&#39;</span><span class="p">:</span> <span class="n">get_NNF_recursive</span><span class="p">(</span><span class="n">beta2</span><span class="p">),</span>
+                                      <span class="s">&#39;alpha-visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                                      <span class="s">&#39;beta-visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                                      <span class="s">&#39;sub-complete-visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">}</span>  <span class="c"># as we negate some formula, we have to ensure that it still remains in NNF</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">tableau</span><span class="p">[</span><span class="s">&#39;formulae&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">f</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">beta2_dict</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]]:</span>  <span class="c"># check duplicate</span>
+                            <span class="n">tableaux_dict</span><span class="p">[</span><span class="s">&#39;was_modified&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                            <span class="n">tableau</span><span class="p">[</span><span class="s">&#39;was_modified&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                            <span class="n">new_tableau</span> <span class="o">=</span> <span class="n">new_deepcopy</span><span class="p">(</span><span class="n">tableau</span><span class="p">)</span>
+                            <span class="n">new_tableau</span><span class="p">[</span><span class="s">&#39;formulae&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                                <span class="n">beta2_dict</span><span class="p">)</span>  <span class="c"># added on a new tableau</span>
+                            <span class="k">if</span> <span class="n">is_proper</span><span class="p">(</span><span class="n">new_tableau</span><span class="p">):</span>
+                                <span class="n">tableaux_dict</span><span class="p">[</span><span class="s">&#39;tableaux&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_tableau</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">tableau</span><span class="p">[</span><span class="s">&#39;formulae&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">f</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">beta1_dict</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]]:</span>  <span class="c"># check duplicate</span>
+                            <span class="n">tableaux_dict</span><span class="p">[</span><span class="s">&#39;was_modified&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                            <span class="n">tableau</span><span class="p">[</span><span class="s">&#39;was_modified&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                            <span class="n">tableau</span><span class="p">[</span><span class="s">&#39;formulae&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">beta1_dict</span><span class="p">)</span>  <span class="c"># added on current tableau</span>
+                            <span class="n">is_proper_tableau</span> <span class="o">=</span> <span class="n">is_proper</span><span class="p">(</span><span class="n">tableau</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">is_disjunction</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]):</span>
+                        <span class="n">beta1_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;formula&#39;</span><span class="p">:</span> <span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+                                      <span class="s">&#39;alpha-visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                                      <span class="s">&#39;beta-visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                                      <span class="s">&#39;sub-complete-visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">}</span>
+                        <span class="n">beta2_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;formula&#39;</span><span class="p">:</span> <span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">3</span><span class="p">],</span>
+                                      <span class="s">&#39;alpha-visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                                      <span class="s">&#39;beta-visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                                      <span class="s">&#39;sub-complete-visited&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">}</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">tableau</span><span class="p">[</span><span class="s">&#39;formulae&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">f</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">beta2_dict</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]]:</span>  <span class="c"># check duplicate</span>
+                            <span class="n">tableaux_dict</span><span class="p">[</span><span class="s">&#39;was_modified&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                            <span class="n">tableau</span><span class="p">[</span><span class="s">&#39;was_modified&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                            <span class="n">new_tableau</span> <span class="o">=</span> <span class="n">new_deepcopy</span><span class="p">(</span><span class="n">tableau</span><span class="p">)</span>
+                            <span class="n">new_tableau</span><span class="p">[</span><span class="s">&#39;formulae&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">beta2_dict</span><span class="p">)</span>  <span class="c"># added on a new tableau</span>
+                            <span class="k">if</span> <span class="n">is_proper</span><span class="p">(</span><span class="n">new_tableau</span><span class="p">):</span>
+                                <span class="n">tableaux_dict</span><span class="p">[</span><span class="s">&#39;tableaux&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_tableau</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">tableau</span><span class="p">[</span><span class="s">&#39;formulae&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">f</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">beta1_dict</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]]:</span>  <span class="c"># check duplicate</span>
+                            <span class="n">tableaux_dict</span><span class="p">[</span><span class="s">&#39;was_modified&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                            <span class="n">tableau</span><span class="p">[</span><span class="s">&#39;was_modified&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                            <span class="n">tableau</span><span class="p">[</span><span class="s">&#39;formulae&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">beta1_dict</span><span class="p">)</span>  <span class="c"># added on current tableau</span>
+                            <span class="n">is_proper_tableau</span> <span class="o">=</span> <span class="n">is_proper</span><span class="p">(</span><span class="n">tableau</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_proper_tableau</span><span class="p">:</span>
+                        <span class="n">tableaux_dict</span><span class="p">[</span><span class="s">&#39;tableaux&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">tableau</span><span class="p">)</span>
+                        <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>  <span class="c"># to avoid list fragmentation</span>
+                        <span class="k">break</span>
+    <span class="k">return</span> <span class="n">tableaux_dict</span>
+
+
+</div>
+<div class="viewcode-block" id="is_proper"><a class="viewcode-back" href="../../code.html#src.tableau.is_proper">[docs]</a><span class="k">def</span> <span class="nf">is_proper</span><span class="p">(</span><span class="n">tableau</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Loop through formulae in reverse mode. Based on tableau construction, small formulae should be at the end of it</span>
+<span class="sd">    :param tableau: Dict tableau dict structure with a list of formulae and some attributes</span>
+<span class="sd">    :return: Boolean  True if is proper, False otherwise</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">pivot_formula</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">tableau</span><span class="p">[</span><span class="s">&#39;formulae&#39;</span><span class="p">]))):</span>
+        <span class="k">if</span> <span class="n">is_false</span><span class="p">(</span><span class="n">pivot_formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]):</span>
+            <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">elif</span> <span class="n">is_atom</span><span class="p">(</span><span class="n">pivot_formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">])</span> <span class="ow">or</span> <span class="n">is_knowledge</span><span class="p">(</span><span class="n">pivot_formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]):</span>
+            <span class="n">is_positive</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">elif</span> <span class="n">is_negated_unary_or_atom</span><span class="p">(</span><span class="n">pivot_formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">],</span><span class="s">&#39;atom&#39;</span><span class="p">)</span> <span class="ow">or</span> \
+                <span class="n">is_negated_unary_or_atom</span><span class="p">(</span><span class="n">pivot_formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">],</span> <span class="s">&#39;knowledge&#39;</span><span class="p">):</span>
+            <span class="n">is_positive</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">index</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">formula</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">tableau</span><span class="p">[</span><span class="s">&#39;formulae&#39;</span><span class="p">][:</span><span class="n">index</span><span class="p">]):</span>
+                <span class="k">if</span> <span class="n">is_positive</span> <span class="ow">and</span> \
+                        <span class="p">(</span><span class="n">is_negated_unary_or_atom</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">],</span> <span class="s">&#39;atom&#39;</span><span class="p">)</span> <span class="ow">or</span>
+                             <span class="n">is_negated_unary_or_atom</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">],</span> <span class="s">&#39;knowledge&#39;</span><span class="p">)):</span>
+                    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">pivot_formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]):</span>
+                        <span class="k">return</span> <span class="bp">False</span>
+                <span class="k">elif</span> <span class="ow">not</span> <span class="n">is_positive</span> <span class="ow">and</span> <span class="p">(</span><span class="n">is_atom</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">])</span> <span class="ow">or</span> <span class="n">is_knowledge</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">])):</span>
+                    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">pivot_formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]):</span>
+                        <span class="k">return</span> <span class="bp">False</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">continue</span>
+    <span class="k">return</span> <span class="bp">True</span>
+
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">formula_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c"># formula_list = [[[&#39;binary&#39;, [[&#39;binary&#39;, [[&#39;binary&#39;, [&#39;p0&#39;], &#39;^&#39;, [&#39;p9&#39;]]], &#39;^&#39;, [&#39;r5&#39;]]], &#39;^&#39;, [[&#39;binary&#39;, [&#39;t9&#39;], &#39;^&#39;, [&#39;q3&#39;]]]]]] #(p0^p9)^r5^(t9^q3)</span>
+    <span class="c"># formula_list.append([[&#39;binary&#39;, [&#39;p0&#39;], &#39;v&#39;, [&#39;p0&#39;]]])</span>
+    <span class="c">#formula_list.append([[&#39;binary&#39;, [&#39;p0&#39;], &#39;v&#39;, [&#39;p0&#39;]]])</span>
+    <span class="c">#formula_list.append([[&#39;binary&#39;, [&#39;p0&#39;], &#39;^&#39;, [&#39;~&#39;,[&#39;p9&#39;]]]])</span>
+    <span class="c">#formula_list.append([[&#39;binary&#39;, [&#39;p0&#39;], &#39;^&#39;, [&#39;~&#39;,[&#39;p9&#39;]]]])</span>
+    <span class="c"># formula_list = [[[&#39;binary&#39;, [[&#39;binary&#39;, [&#39;p0&#39;], &#39;v&#39;, [&#39;p9&#39;]]], &#39;^&#39;, [&#39;t5&#39;]]]]</span>
+    <span class="c"># formula_list = [[[&#39;binary&#39;, [[&#39;binary&#39;, [&#39;p0&#39;], &#39;^&#39;, [&#39;p9&#39;]]], &#39;v&#39;, [&#39;t5&#39;]]]]</span>
+    <span class="c"># formula_list.append([&#39;G&#39;, [[&#39;binary&#39;, [&#39;p0&#39;], &#39;^&#39;, [&#39;p0&#39;]]]])</span>
+    <span class="c">#formula_list.append([&#39;G&#39;, [[&#39;binary&#39;, [&#39;p0&#39;], &#39;^&#39;, [&#39;p0&#39;]]]])</span>
+    <span class="c">#formula_list = [[[&#39;binary&#39;, [&#39;p0&#39;], &#39;W&#39;, [&#39;q9&#39;]]]]</span>
+    <span class="c">#formula_list.append([&#39;F&#39;, [&#39;~&#39;, [&#39;p0&#39;]]])</span>
+    <span class="c"># formula_list.append([&#39;~&#39;, [&#39;p0&#39;]])</span>
+    <span class="c">#formula_list.append([[&#39;binary&#39;, [[&#39;binary&#39;, [&#39;p0&#39;], &#39;v&#39;, [&#39;~&#39;, [&#39;p1&#39;]]]], &#39;^&#39;, [&#39;p1&#39;]]])</span>
+    <span class="n">belief</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">tableaux</span> <span class="o">=</span> <span class="n">get_tableaux</span><span class="p">(</span><span class="n">formula_list</span><span class="p">,</span> <span class="n">belief</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">tableau</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tableaux</span><span class="p">):</span>
+        <span class="k">print</span> <span class="s">&#39;is proper: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">is_proper</span><span class="p">(</span><span class="n">tableau</span><span class="p">))</span>
+        <span class="k">print</span> <span class="s">&#39;tableau branch: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">formula</span> <span class="ow">in</span> <span class="n">tableau</span><span class="p">[</span><span class="s">&#39;formulae&#39;</span><span class="p">]:</span>
+            <span class="k">print</span> <span class="n">formula</span><span class="p">[</span><span class="s">&#39;formula&#39;</span><span class="p">]</span>
+        <span class="k">print</span> <span class="s">&#39;--------------------------&#39;</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">TableauVerifier 1.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Thiago Vieira.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

@@ -1,7 +1,7 @@
 Documentation for the Code
 **************************
 
-.. automodule:: srcLRparsing
+.. automodule:: src
 
 
 formula_utils.py
@@ -9,7 +9,7 @@ formula_utils.py
 
 Auxiliary formula functions implementation
 
-.. automodule:: srcLRparsing.formula_utils
+.. automodule:: src.formula_utils
    :members:
 
 grammar.py
@@ -17,7 +17,7 @@ grammar.py
 
 Grammar implementation
 
-.. automodule:: srcLRparsing.grammar
+.. automodule:: src.grammar
    :members:
 
 tableau.py
@@ -25,7 +25,7 @@ tableau.py
 
 PC-Tableaux implementation
 
-.. automodule:: srcLRparsing.tableau
+.. automodule:: src.tableau
    :members:
 
 graph.py
@@ -33,5 +33,5 @@ graph.py
 
 Tableau structure implementation
 
-.. automodule:: srcLRparsing.graph
+.. automodule:: src.graph
    :members:
